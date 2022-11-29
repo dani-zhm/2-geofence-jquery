@@ -3,12 +3,21 @@ import { getBoundaries, getStages } from "./utils/fetch";
 import config from "./config";
 
 /**
+ *
+ * TODO:
+ * - if !stages then: 
+ *  -- implement file upload
+ *   --- https://map.ir/geofence/stages
+ *   --- POST
+ *   --- file must have field name of polygons
  * 
- * TODO: 
- * - implement file upload
- *  -- 
+ *
+ * - if stage then:
+ *   -- display stages ids[]
+ *   -- display polys on map
+ *   -- allow deletion of stages 
+ *
  */
-
 
 async function handleMapClick(ev: any) {
   const ids = await getBoundaries(ev.latlng);
