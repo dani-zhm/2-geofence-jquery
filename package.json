@@ -1,0 +1,22 @@
+{
+  "name": "2-geofence",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@types/axios": "^0.14.0",
+    "axios": "^1.2.0",
+    "typescript": "^4.6.4",
+    "vite": "^3.2.3"
+  },
+  "dependencies": {
+    "@types/jquery": "^3.2.1",
+    "@types/leaflet": "^1.9.0",
+    "leaflet": "^1.9.3"
+  }
+}
