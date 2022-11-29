@@ -1,77 +1,22 @@
 import "./style.css";
-import axios from "axios";
-import { Coords, GetPolygonsRes } from "./types";
-
-// Mapp imports
-// css
-// import "./Mapp/css/mapp.min.css";
-// import "./Mapp/css/fa/style.css";
-// // js
-// import "./Mapp/js/jquery-3.2.1.min.js";
-// import "./Mapp/js/mapp.env.js";
-// import "./Mapp/js/mapp.min.js";
+import { getBoundaries, getStages } from "./utils/fetch";
+import config from "./config";
 
 /**
- * plan:
- * - fetch uploaded file
- * https://map.ir/geofence/stages, GET method, x-api-key in header,
- * - display the polygons
- * - let the user click,
- * - button for sending click coordinates
- * https://map.ir/geofence/boundaries?lat={...}&lon={...} , lat and lon params
- * - the polygon that has the right id
+ * 
+ * TODO: 
+ * - implement file upload
+ *  -- 
  */
 
-const apiKey =
-  "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6ImM2ZjVkYzFjNGQ3ZjMxNmFkZDE5Njc3MTliMjNhZDFiOTQ1Nzg2ZmJhOWVkNzBhZDdmNTMwNmFjOWY3OTNjNzI4NjM0YTlmMGQ2N2IwNmY3In0.eyJhdWQiOiIyMDA4NyIsImp0aSI6ImM2ZjVkYzFjNGQ3ZjMxNmFkZDE5Njc3MTliMjNhZDFiOTQ1Nzg2ZmJhOWVkNzBhZDdmNTMwNmFjOWY3OTNjNzI4NjM0YTlmMGQ2N2IwNmY3IiwiaWF0IjoxNjY5MDk2ODczLCJuYmYiOjE2NjkwOTY4NzMsImV4cCI6MTY3MTYwMjQ3Mywic3ViIjoiIiwic2NvcGVzIjpbImJhc2ljIl19.r5EUqb9v6QDkS44OUQ8jxe19E3sdhZWFyGAPfrLvJ8TKMtxkKVipSdNUqmSTewng6595y3J7nWfCAYInAE4nSYm0oOxjIBu9Cs2vPhrpl3rrALbrVWi5MfmO1u6C176qy5oLM7Y6JY2bBVDJkpfZct_jKpo75C8BzB8jMwp1KAb0rO3evboszfNnoQ5H_VaZFrKIoXCea0YfcCRKtsrTtpGEWGPolk-_ITLNbtgHz8ust-TjeYKDHsS4OypptcJNkm83K5I74OjSMNblpza44ZxW8bSTZviQu7FTSuI2tfz27MQ7ijpLZHio23ps_yepvL_ejvhEEVdzkU4vIU5i2A";
-
-const BASE_URL = "https://map.ir/geofence";
-
-function normalizeCoords(coords: Coords[]) {
-  return coords.map((c) => [c[1], c[0]]);
-}
-
-const fetch = axios.create({
-  headers: { "x-api-key": apiKey },
-  baseURL: BASE_URL,
-});
 
 async function handleMapClick(ev: any) {
-  const { lat, lng } = ev.latlng;
-  console.log("clicked on map");
-
-  try {
-    const res = await fetch.get("/boundaries", { params: { lat, lon: lng } });
-    if (res.data.value) {
-      const data: GetPolygonsRes = res.data;
-      const polys = data.value.map((v) => v.id);
-      $("#results").append(`overlapped with ${polys.join(" and ")}! <br/>`);
-    }
-  } catch (error) {
+  const ids = await getBoundaries(ev.latlng);
+  if (ids.length > 0) {
+    $("#results").append(`overlapped with ${ids.join(" and ")}! <br/>`);
+  } else {
     $("#results").append("No overlap <br/>");
   }
-}
-
-interface Polygon {
-  id: number;
-  coordinates: Coords[];
-}
-
-async function fetchUploadedPolygons(): Promise<Polygon[]> {
-  try {
-    const res = await fetch.get("/stages");
-    if (res.data.value) {
-      const data: GetPolygonsRes = res.data;
-      const polygons = data.value?.map((v) => ({
-        id: v.id,
-        coordinates: normalizeCoords(v.boundary.coordinates[0]) as Coords[],
-      }));
-      return polygons;
-    }
-  } catch (error) {
-    return [];
-  }
-  return [];
 }
 
 async function mapInit() {
@@ -85,12 +30,12 @@ async function mapInit() {
       },
       zoom: 13,
     },
-    apiKey,
+    apiKey: config.apiKey,
   });
 
   app.addLayers();
 
-  const polygons = await fetchUploadedPolygons();
+  const polygons = await getStages();
 
   for (const polygon of polygons) {
     app.addPolygon({

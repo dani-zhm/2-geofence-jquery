@@ -8,6 +8,11 @@ interface ValueEntity {
 
 export type Coords = [number, number];
 
+export interface Polygon {
+  id: number;
+  coordinates: Coords[];
+}
+
 interface Boundary {
   type: string;
   coordinates: Coords[][];
